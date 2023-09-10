@@ -1,0 +1,140 @@
+
+
+package com.example.rewriteswing;
+
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+
+class ContactFX extends Application {
+    // Fields for user inputs
+    private TextField nameField, ageField, weightField, heightField;
+    private ComboBox<String> activityLevel, goal;
+    private ToggleGroup genderGroup;
+    private double bmr = 0.0;
+
+    @Override
+    public void start(Stage primaryStage) {
+        // Create layout grid
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(5);
+
+        // Initialize text fields
+        nameField = new TextField();
+        ageField = new TextField();
+        weightField = new TextField();
+        heightField = new TextField();
+
+        // Add labels and text fields to grid
+        grid.add(new Label("Введите имя:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Введите возраст:"), 0, 1);
+        grid.add(ageField, 1, 1);
+        grid.add(new Label("Введите вес:"), 0, 2);
+        grid.add(weightField, 1, 2);
+        grid.add(new Label("Введите рост, в см:"), 0, 3);
+        grid.add(heightField, 1, 3);
+
+        // Gender radio buttons
+        RadioButton male = new RadioButton("мужской");
+        RadioButton female = new RadioButton("женский");
+        genderGroup = new ToggleGroup();
+        male.setToggleGroup(genderGroup);
+        female.setToggleGroup(genderGroup);
+        female.setSelected(true);\\ женский по умолчанию
+        grid.add(male, 0, 4);
+        grid.add(female, 1, 4);
+
+        // Activity Level ComboBox   // создание списка для выбора цели кфа
+        ObservableList<String> activityOptions = FXCollections.observableArrayList("Малоподвижный", "Умеренный", "Активный");
+        activityLevel = new ComboBox<>(activityOptions);
+        grid.add(new Label("Уровень физической активности:"), 0, 5);
+        grid.add(activityLevel, 1, 5);
+
+        // Goal ComboBox
+        ObservableList<String> goalOptions = FXCollections.observableArrayList("Похудение", "Поддержание веса", "Набор веса");
+        goal = new ComboBox<>(goalOptions);
+        grid.add(new Label("Ваша цель:"), 0, 6);
+        grid.add(goal, 1, 6);
+
+        // Submit Button
+        Button submitBtn = new Button("Рассчитать");
+	sumbitBtn.setStyle("-fx-background-color: #00bfff; -fx-text-fill: #ffffff;");  // голубая кнопка
+        grid.add(submitBtn, 1, 7);
+        submitBtn.setOnAction(e -> handleSubmit());   // обработчик событий
+
+        // Set scene and show stage
+        Scene scene = new Scene(grid, 450, 250);
+        primaryStage.setTitle("Калькулятор калорий");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void handleSubmit() {             // метод вызывается при нажатии кнопки рассчитать
+        try {
+            String name = nameField.getText();
+            int age = Integer.parseInt(ageField.getText());
+            double weight = Double.parseDouble(weightField.getText());
+            double height = Double.parseDouble(heightField.getText());
+
+            RadioButton selectedGender = (RadioButton) genderGroup.getSelectedToggle();
+            if (selectedGender.getText().equals("мужской")) {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+
+            String selectedActivity = activityLevel.getSelectionModel().getSelectedItem();
+            double cal = 0;
+            switch (selectedActivity) {
+                case "Малоподвижный":
+                    cal = bmr * 1.5;
+                    break;
+                case "Умеренный":
+                    cal = bmr * 1.75;
+                    break;
+                case "Активный":
+                    cal = bmr * 2;
+                    break;
+            }
+
+            String selectedGoal = goal.getSelectionModel().getSelectedItem();
+            double res = 0;
+            switch (selectedGoal) {
+                case "Похудение":
+                    res = cal - 600;
+                    break;
+                case "Поддержание веса":
+                    res = cal;
+                    break;
+                case "Набор веса":
+                    res = cal + 0.15 * cal;
+                    break;
+            }
+
+            String message = "Ваш возраст: " + age + "\n" + "Ваш вес: " + weight + "\n" + "Ваш рост: " + height + "\n" + "Ваша норма калорий с учетом физиологических особенностей и цели: " + "\n" + res;
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK);
+            alert.setHeaderText("Привет, " + name);
+            alert.showAndWait();
+
+        } catch (NumberFormatException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Ошибка ввода. Введите корректные данные.", ButtonType.OK);
+            alert.showAndWait();
+        }
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+
+
+
+
